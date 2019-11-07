@@ -410,28 +410,27 @@
                 this.details = true;
             },
             assigned() {
-                for (var i = 0; i < this.techs.length; i++) {
-                    this.techs[i].sites = parseInt(Math.random()*20) + 1;
-                    this.techs[i].currently = parseInt(Math.random()*20) + 1;
-                    this.techs[i].overdue = parseInt(Math.random()*20) + 1;
-                    this.techs[i].vendor_assigned = parseInt(Math.random()*20) + 1;
-                    this.techs[i].unassigned = parseInt(Math.random()*20) + 1;
-                    this.techs[i].pending_confirmation = parseInt(Math.random()*20) + 1;
-                    this.techs[i].check_in = parseInt(Math.random()*20) + 1;
-                    this.techs[i].check_out = parseInt(Math.random()*20) + 1;
-                    this.techs[i].total = parseInt(Math.random()*20) + 1;
-                }
-
+                this.techs.forEach((tech) => {
+                    tech.sites = parseInt(Math.random()*20) + 1;
+                    tech.currently = parseInt(Math.random()*20) + 1;
+                    tech.overdue = parseInt(Math.random()*20) + 1;
+                    tech.vendor_assigned = parseInt(Math.random()*20) + 1;
+                    tech.unassigned = parseInt(Math.random()*20) + 1;
+                    tech.pending_confirmation = parseInt(Math.random()*20) + 1;
+                    tech.check_in = parseInt(Math.random()*20) + 1;
+                    tech.check_out = parseInt(Math.random()*20) + 1;
+                    tech.total = parseInt(Math.random()*20) + 1;
+                });
             },
             modified() {
-                for (var i = 0; i < this.wos.length; i++) {
+                this.wos.forEach((wo) => {
                     let tech_id = parseInt(Math.random()*7) + 1;
                     let priority_id = Math.random() > 0.5 ? parseInt(Math.random()*5) + 1 : this.priority_id;
                     let type_id = Math.random() > 0.5 ? parseInt(Math.random()*8) + 1 : this.type_id;
-                    this.wos[i].tech_id = tech_id;
-                    this.wos[i].priority_id = priority_id;
-                    this.wos[i].type_id = type_id;
-                }
+                    wo.tech_id = tech_id;
+                    wo.priority_id = priority_id;
+                    wo.type_id = type_id;
+                });
             }
         },
         computed: {
