@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
+    integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+
+    <title>Tech Monitor</title>
+</head>
+<body>
+    <div class="container-fluid" id="app">
+        <div class="row" style="margin-top: 50px;">
+            <div class="col-sm-12 col-md-6" style="margin-bottom: 50px">
+
+                <div class="row">
+                    <div class="input-group col-sm-12 col-md-4 text-right">
+                        <label for="select" class="col-12" style="text-align: left;  padding: 0px;">
+                            Priority:
+                        </label>
+                        <div class="input-group mb-3">
+                            <select id="select" class="custom-select" v-model="priority_id">
+                                <option v-for="priority in priorities" v-bind:value="priority.id">{{ priority.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group col-sm-12 offset-md-4 col-md-4 text-right">
+                        <label for="select" class="col-12" style="text-align: right;  padding: 0px;">
+                            Type:
+                        </label>
+                        <div class="input-group mb-3">
+                            <select id="select" class="custom-select" v-model="type_id">
+                                <option v-for="type in types" v-bind:value="type.id">{{ type.name }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="input-group col-sm-12 col-md-6">
+                        <label for="searchTech">Filter:</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="searchTech"><i class="fa fa-search"></i></span>
+                            </div>
+                            <input type="text" class="form-control" id="searchTech"
+                            placeholder="Search" aria-label="Search"
+                            aria-describedby="searchTech"
+                            v-model.trim="searchTech"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="input-group col-sm-12 offset-md-2 col-md-4 text-right">
+                        <label for="select" class="col-12" style="text-align: right;  padding: 0px;">
+                            Records per page:
+                        </label>
+                        <div class="input-group mb-3">
+                            <select id="select" class="custom-select" v-model="techPerPage">
+                                <option v-for="perPage in perPageValues" v-bind:value="perPage.value">{{ perPage.text }}</option>
+                            </select>
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="search"><i class="fa fa-hand-pointer"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>Tech Monitor</h4>
+
+                <table class="table table-striped table-hover table-responsive table-bordered">
+                    <thead>
+                        <tr class="orderBy">
+                            <th v-on:click="orderBy('name')">
+                                <i v-if="sortKey=='name' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='name' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Technician
+                            </th>
+                            <th v-on:click="orderBy('overdue')">
+                                <i v-if="sortKey=='overdue' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='overdue' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Overdue
+                            </th>
+                            <th v-on:click="orderBy('pending_confirmation')">
+                                <i v-if="sortKey=='pending_confirmation' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='pending_confirmation' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Pending Confirmation
+                            </th>
+                            <th v-on:click="orderBy('check_in')">
+                                <i v-if="sortKey=='check_in' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='check_in' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Check In
+                            </th>
+                            <th v-on:click="orderBy('check_out')">
+                                <i v-if="sortKey=='check_out' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='check_out' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Check Out
+                            </th>
+                            <th v-on:click="orderBy('total')">
+                                <i v-if="sortKey=='total' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='total' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Total
+                            </th>
+                            <th v-on:click="orderBy('sites')">
+                                <i v-if="sortKey=='sites' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='sites' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Sites
+                            </th>
+                            <th v-on:click="orderBy('vendor_assigned')">
+                                <i v-if="sortKey=='vendor_assigned' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='vendor_assigned' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Vendor Assigned WOs(*)
+                            </th>
+                            <th v-on:click="orderBy('unassigned')">
+                                <i v-if="sortKey=='unassigned' && orderAsc" class="fa fa-sort-alpha-down float-right"></i>
+                                <i v-if="sortKey=='unassigned' && !orderAsc" class="fa fa-sort-alpha-up float-right"></i>
+                                Unassigned WOs(**)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template v-for="(tech, index) in techFiltered">
+                            <tr :class="tech.tech_id == techSelected.tech_id ? 'table-primary' : ''" v-show="(pagTech - 1) * techPerPage <= index && pagTech * techPerPage > index">
+                                <th v-text="tech.name"></th>
+                                <td><a href="#" v-on:click.prevent="viewDetails(); techSelected = tech;">{{tech.overdue}}</a></td>
+                                <td><a href="#" v-on:click.prevent="viewDetails(); techSelected = tech;">{{tech.pending_confirmation}}</a></td>
+                                <td><a href="#" v-on:click.prevent="viewDetails(); techSelected = tech;">{{tech.check_in}}</a></td>
+                                <td><a href="#" v-on:click.prevent="viewDetails(); techSelected = tech;">{{tech.check_out}}</a></td>
+                                <td><a href="#" v-on:click.prevent="viewDetails(); techSelected = tech;">{{tech.total}}</a></td>
+                                <td><a href="#" v-on:click.prevent="viewDetails(); techSelected = tech;">{{tech.sites}}</a></td>
+                                <td><a href="#" v-on:click.prevent="viewDetails(); techSelected = tech;">{{tech.vendor_assigned}}</a></td>
+                                <td><a href="#" v-on:click.prevent="viewDetails(); techSelected = tech;">{{tech.unassigned}}</a></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+
+                <nav aria-label="Page navigation" class="navbar-center" style="text-align: center;">
+                    <ul class="pagination text-center">
+                        <li>
+                            <a class="page-link" href="#" aria-label="Previous" v-show="pagTech != 1" v-on:click.prevent="pagTech -= 1">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item" v-for="page in techPagesNumber" :key="page" :class="[page == pagTech ? 'active' : '']">
+                            <a class="page-link" href="#" v-on:click.prevent="pagTech = page" v-text="page" :disabled="page == pagWo"></a>
+                        </li>
+                        <li>
+                            <a class="page-link" href="#" aria-label="Next" v-show="pagTech * techPerPage / techFiltered.length < 1"
+                            v-on:click.prevent="pagTech += 1">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+
+        <div class="col-sm-12 col-md-6" v-if="details">
+            <div class="row">
+                <div class="input-group col-sm-12 col-md-6">
+                    <label for="searchWO">Filter:</label>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="searchWO"><i class="fa fa-search"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="searchWO"
+                        placeholder="Search" aria-label="Search"
+                        aria-describedby="searchWO"
+                        v-model.trim="searchWO"
+                        >
+                    </div>
+                </div>
+
+                <div class="input-group col-sm-12 offset-md-2 col-md-4 text-right">
+                    <label for="select" class="col-12" style="text-align: right;  padding: 0px;">
+                        Records per page:
+                    </label>
+                    <div class="input-group mb-3">
+                        <select id="select" class="custom-select" v-model="woPerPage">
+                            <option v-for="perPage in perPageWoValues" v-bind:value="perPage.value">{{ perPage.text }}</option>
+                        </select>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="search"><i class="fa fa-hand-pointer"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h5 style="margin-top: 5px;">Details for Tech: {{ techSelected.name }}</h5>  
+            <table class="table table-striped table-responsive table-bordered">
+                <thead>
+                    <tr class="orderBy">
+                        <th v-on:click="orderByWO('code')">
+                            <i v-if="sortKeyWO=='code' && orderAscWo" class="fa fa-sort-alpha-down float-right"></i>
+                            <i v-if="sortKeyWO=='code' && !orderAscWo" class="fa fa-sort-alpha-up float-right"></i>
+                            W.O.
+                        </th>
+                        <th v-on:click="orderByWO('status')">
+                            <i v-if="sortKeyWO=='status' && orderAscWo" class="fa fa-sort-alpha-down float-right"></i>
+                            <i v-if="sortKeyWO=='status' && !orderAscWo" class="fa fa-sort-alpha-up float-right"></i>
+                            Status
+                        </th>
+                        <th v-on:click="orderByWO('substatus')">
+                            <i v-if="sortKeyWO=='substatus' && !orderAscWo" class="fa fa-sort-alpha-up float-right"></i>
+                            SubStatus
+                        </th>
+                        <th v-on:click="orderByWO('site')">
+                            <i v-if="sortKeyWO=='site' && orderAscWo" class="fa fa-sort-alpha-down float-right"></i>
+                            <i v-if="sortKeyWO=='site' && !orderAscWo" class="fa fa-sort-alpha-up float-right"></i>
+                            Site(#)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template v-for="(wo, index) in wosForTech" >
+                        <tr v-show="(pagWo - 1) * woPerPage <= index && pagWo * woPerPage > index">
+                            <th> <a v-bind:href="`https://devaramark-portal.ecobpm.com/service-orders/${wo.code}`" target="_blank">{{ wo.code }}</a> </th>
+                            <td v-text="wo.status"></td>
+                            <td v-text="wo.substatus"></td>
+                            <td v-text="wo.site"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+
+            <nav aria-label="Page navigation" class="navbar-center" style="text-align: center;">
+                <ul class="pagination text-center">
+                    <li>
+                        <a class="page-link" href="#" aria-label="Previous" v-show="pagWo != 1" v-on:click.prevent="pagWo -= 1">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item" v-for="page in woPagesNumber" :key="page" :class="[page == pagWo ? 'active' : '']">
+                        <a class="page-link" href="#" v-on:click.prevent="pagWo = page" v-text="page" :disabled="page == pagWo"></a>
+                    </li>
+                    <li>
+                        <a class="page-link" href="#" aria-label="Next" v-show="pagWo * woPerPage / wosForTech.length < 1" v-on:click.prevent="pagWo += 1">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Optional JavaScript -->
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            searchTech: '',
+            searchWO: '',
+            details: false,
+            techPerPage: 20,
+            pagTech: 1,
+            woPerPage: 20,
+            pagWo: 1,
+            type_id: 1,
+            priority_id: 1,
+            orderAsc: true,
+            orderAscWo: true,
+            perPageValues: [ { value: 2, text: 2 }, { value: 5, text: 5 }, { value: 10, text: 10 }, { value: 15, text: 15 }, { value: 20, text: 20 }, { value: 50, text: 50 } ],
+            perPageWoValues: [ { value: 2, text: 2 }, { value: 5, text: 5 }, { value: 10, text: 10 }, { value: 15, text: 15 }, { value: 20, text: 20 }, { value: 50, text: 50 } ],
+            view_details: false,
+            techSelected: {},
+            techs: [
+            {tech_id: 1, name: 'Alan Tello', sites: 10, currently: 23, overdue: 5, vendor_assigned: 14, unassigned: 12, pending_confirmation: 5, check_in: 8, check_out: 4, total: 5},
+            {tech_id: 2, name: 'Jose Gutierrez', sites: 8, currently: 12, overdue: 4, vendor_assigned: 5, unassigned: 9, pending_confirmation: 2, check_in: 4, check_out: 3, total: 8},
+            {tech_id: 3, name: 'Edwyn Rangel', sites: 15, currently: 7, overdue: 8, vendor_assigned: 4, unassigned: 4, pending_confirmation: 7, check_in: 8, check_out: 4, total: 5},
+            {tech_id: 4, name: 'Moisés Quispe', sites: 14, currently: 9, overdue: 3, vendor_assigned: 46, unassigned: 9, pending_confirmation: 3, check_in: 9, check_out: 6, total: 12},
+            {tech_id: 5, name: 'Herminio Heredia', sites: 3, currently: 14, overdue: 1, vendor_assigned: 12, unassigned: 18, pending_confirmation: 7, check_in: 6, check_out: 5, total: 4},
+            {tech_id: 6, name: 'Dioran Molero', sites: 9, currently: 6, overdue: 4, vendor_assigned: 9, unassigned: 25, pending_confirmation: 4, check_in: 8, check_out: 9, total: 15},
+            {tech_id: 7, name: 'Juan Diego', sites: 4, currently: 34, overdue: 9, vendor_assigned: 2, unassigned: 36, pending_confirmation: 4, check_in: 6, check_out: 2, total: 25}
+            ],
+            priorities: [
+            {id: 1, name: 'P1' },
+            {id: 2, name: 'P2' },
+            {id: 3, name: 'P3' },
+            {id: 4, name: 'P4' },
+            {id: 5, name: 'P5' }
+            ],
+            types: [
+            {id: 1, name: 'Service Order'},
+            {id: 2, name: 'Preventive Maint'},
+            {id: 3, name: 'Corrective Maint'},
+            {id: 4, name: 'Capital Project'},
+            {id: 5, name: 'Major Repair'},
+            {id: 6, name: 'Recurring Service'},
+            {id: 7, name: 'Extra Service'},
+            {id: 8, name: 'Punch List'}
+            ],
+            wos: [
+            {tech_id: 1, code: 'AMC-000000001', status: 'Alias Planning', substatus: 'Alias Check In', site: '14703 -  LANS BOBWHITE', priority_id: 1, type_id: 1},
+            {tech_id: 2, code: 'ARA-000000017', status: 'Alias Cancelled', substatus: 'Alias Closed', site: '14705 -  LANS MAY', priority_id: 2, type_id: 2},
+            {tech_id: 3, code: 'ARA-000000018', status: 'Alias All', substatus: 'Alias Cancelled', site: '14707 -  LANS ENON', priority_id: 3, type_id: 3},
+            {tech_id: 4, code: 'ARA-000000019', status: 'Alias Progress', substatus: 'Alias Check Out', site: '14709 -  LANS PINE GROVE', priority_id: 4, type_id: 4},
+            {tech_id: 5, code: 'ARA-000000020', status: 'Alias Scheduled', substatus: 'Alias New', site: '14711 -  LANS HAMILTON', priority_id: 5, type_id: 5},
+            {tech_id: 6, code: 'ARA-000000021', status: 'Alias Closed', substatus: 'Alias Need Estimates', site: '14715 -  LASS MAYFLOWER COURT', priority_id: 1, type_id: 6},
+            {tech_id: 7, code: 'ARA-000000022', status: 'Alias Completed', substatus: 'Alias Pending Payment', site: '14719 -  LASS 47TH', priority_id: 2, type_id: 7},
+            {tech_id: 1, code: 'ARA-AMC-001', status: 'Alias Deferred', substatus: 'Alias Need Vendor', site: '14722 -  LASS MAGNOLIA', priority_id: 3, type_id: 8},
+            {tech_id: 2, code: 'ARA-AMC-002', status: 'Alias Planning', substatus: 'Alias Check In', site: '14725 -  LANS STEWART', priority_id: 4, type_id: 1},
+            {tech_id: 3, code: 'ARA-AMC-003', status: 'Alias Cancelled', substatus: 'Alias Closed', site: '14730 -  LANS PELICAN', priority_id: 5, type_id: 2},
+            {tech_id: 4, code: 'ARA-AMC-004', status: 'Alias All', substatus: 'Alias Cancelled', site: '14731 -  LANS DIPPLE', priority_id: 1, type_id: 3},
+            {tech_id: 5, code: 'ARA-AMC-005', status: 'Alias Progress', substatus: 'Alias Check Out', site: '14735 -  LANS CONNIE', priority_id: 2, type_id: 4},
+            {tech_id: 6, code: 'ARA-AMC-006', status: 'Alias Scheduled', substatus: 'Alias New', site: '14737 -  LANS PANAMA', priority_id: 3, type_id: 5},
+            {tech_id: 7, code: 'ARA-AMC-007', status: 'Alias Closed', substatus: 'Alias Need Estimates', site: '14740 -  LANS ACADIANA', priority_id: 4, type_id: 6},
+            {tech_id: 1, code: 'ARA-AMC-008', status: 'Alias Completed', substatus: 'Alias Pending Payment', site: '14741 -  LANS HWY 190', priority_id: 5, type_id: 7},
+            {tech_id: 2, code: 'ARA-AMC-009', status: 'Alias Deferred', substatus: 'Alias Need Vendor', site: '14742 -  LANS TRACEY', priority_id: 1, type_id: 8},
+            {tech_id: 3, code: 'ARA-AMC-010', status: 'Alias Planning', substatus: 'Alias Check In', site: '14743 -  LANS WELLS', priority_id: 2, type_id: 1},
+            {tech_id: 4, code: 'ARA-AMC-011', status: 'Alias Cancelled', substatus: 'Alias Closed', site: '14745 -  LANS SHARP', priority_id: 3, type_id: 2},
+            {tech_id: 5, code: 'ARA-AMC-012', status: 'Alias All', substatus: 'Alias Cancelled', site: '14754 -  LANS LYNN', priority_id: 4, type_id: 3},
+            {tech_id: 6, code: 'ARA-AMC-013', status: 'Alias Progress', substatus: 'Alias Check Out', site: '14756 -  LANS TRIPPI', priority_id: 5, type_id: 4},
+            {tech_id: 7, code: 'ARA-AMC-014', status: 'Alias Scheduled', substatus: 'Alias New', site: '14757 -  LANS RENEE', priority_id: 1, type_id: 5},
+            {tech_id: 1, code: 'ARA-AMC-015', status: 'Alias Progress', substatus: 'Alias New', site: '14758 -  LANS W MORRIS', priority_id: 2, type_id: 6},
+            {tech_id: 2, code: 'ARA-AMC-016', status: 'Alias Closed', substatus: 'Alias Need Estimates', site: '73299 -  LANS NEW BUSINESS', priority_id: 3, type_id: 7},
+            {tech_id: 3, code: 'ARA-AMC-017', status: 'Alias Completed', substatus: 'Alias Pending Payment', site: '73301 -  NORTH SHORE BALANCE SHEET', priority_id: 4, type_id: 8},
+            {tech_id: 4, code: 'ARA-AMC-018', status: 'Alias Deferred', substatus: 'Alias Need Vendor', site: '73305 -  LASS 4TH', priority_id: 5, type_id: 1},
+            {tech_id: 5, code: 'ARA-AMC-019', status: 'Alias Planning', substatus: 'Alias Closed', site: '73307 -  LASS ANGUS', priority_id: 1, type_id: 2},
+            {tech_id: 6, code: 'ARA-AMC-020', status: 'Alias Cancelled', substatus: 'Alias Cancelled', site: '73314 -  LASS 17TH', priority_id: 2, type_id: 3},
+            {tech_id: 7, code: 'ARA-AMC-021', status: 'Alias All', substatus: 'Alias Check Out', site: '73316 -  LASS CARLISLE', priority_id: 3, type_id: 4},
+            {tech_id: 1, code: 'DEVARA-ClientNicolle-269', status: 'Alias Planning', substatus: 'Alias Check In', site: '14703 -  LANS BOBWHITE', priority_id: 4, type_id: 5},
+            {tech_id: 2, code: 'DEVARA-RES-28441', status: 'Alias Cancelled', substatus: 'Alias Closed', site: '14705 -  LANS MAY', priority_id: 5, type_id: 6},
+            {tech_id: 3, code: 'DEVARA-RES-28440', status: 'Alias All', substatus: 'Alias Cancelled', site: '14707 -  LANS ENON', priority_id: 1, type_id: 7},
+            {tech_id: 4, code: 'DEVARA-RES-28439', status: 'Alias Progress', substatus: 'Alias Check Out', site: '14709 -  LANS PINE GROVE', priority_id: 2, type_id: 8},
+            {tech_id: 5, code: 'DEVARA-RES-28438', status: 'Alias Scheduled', substatus: 'Alias New', site: '14711 -  LANS HAMILTON', priority_id: 3, type_id: 1},
+            {tech_id: 6, code: 'DEVARA-RES-28437', status: 'Alias Closed', substatus: 'Alias Need Estimates', site: '14715 -  LASS MAYFLOWER COURT', priority_id: 4, type_id: 2},
+            {tech_id: 7, code: 'DEVARA-RES-28436', status: 'Alias Completed', substatus: 'Alias Pending Payment', site: '14719 -  LASS 47TH', priority_id: 5, type_id: 3},
+            {tech_id: 1, code: 'DEVARA-RES-28435', status: 'Alias Deferred', substatus: 'Alias Need Vendor', site: '14722 -  LASS MAGNOLIA', priority_id: 1, type_id: 4},
+            {tech_id: 2, code: 'DEVARA-RES-28434', status: 'Alias Planning', substatus: 'Alias Check In', site: '14725 -  LANS STEWART', priority_id: 2, type_id: 5},
+            {tech_id: 3, code: 'DEVARA-RES-28433', status: 'Alias Cancelled', substatus: 'Alias Closed', site: '14730 -  LANS PELICAN', priority_id: 3, type_id: 6},
+            {tech_id: 4, code: 'DEVARA-RES-28432', status: 'Alias All', substatus: 'Alias Cancelled', site: '14731 -  LANS DIPPLE', priority_id: 4, type_id: 7},
+            {tech_id: 5, code: 'DEVARA-ClientNicolle-268', status: 'Alias Progress', substatus: 'Alias Check Out', site: '14735 -  LANS CONNIE', priority_id: 5, type_id: 8},
+            {tech_id: 6, code: 'RES-000000059', status: 'Alias Scheduled', substatus: 'Alias New', site: '14737 -  LANS PANAMA', priority_id: 1, type_id: 1},
+            {tech_id: 7, code: 'DEVARA-RES-28431', status: 'Alias Closed', substatus: 'Alias Need Estimates', site: '14740 -  LANS ACADIANA', priority_id: 2, type_id: 2},
+            {tech_id: 1, code: 'DEVARA-RES-28430', status: 'Alias Completed', substatus: 'Alias Pending Payment', site: '14741 -  LANS HWY 190', priority_id: 3, type_id: 3},
+            {tech_id: 2, code: 'DEVARA-RES-28429', status: 'Alias Deferred', substatus: 'Alias Need Vendor', site: '14742 -  LANS TRACEY', priority_id: 4, type_id: 4},
+            {tech_id: 3, code: 'DEVARA-ClientNicolle-267', status: 'Alias Planning', substatus: 'Alias Check In', site: '14743 -  LANS WELLS', priority_id: 5, type_id: 5},
+            {tech_id: 4, code: 'DEVARA-ClientNicolle-266', status: 'Alias Cancelled', substatus: 'Alias Closed', site: '14745 -  LANS SHARP', priority_id: 1, type_id: 6},
+            {tech_id: 5, code: 'DEVARA-ClientNicolle-265', status: 'Alias All', substatus: 'Alias Cancelled', site: '14754 -  LANS LYNN', priority_id: 2, type_id: 7},
+            {tech_id: 6, code: 'DEVARA-ClientNicolle-264', status: 'Alias Progress', substatus: 'Alias Check Out', site: '14756 -  LANS TRIPPI', priority_id: 3, type_id: 8},
+            {tech_id: 7, code: 'DEVARA-ClientNicolle-263', status: 'Alias Scheduled', substatus: 'Alias New', site: '14757 -  LANS RENEE', priority_id: 4, type_id: 1},
+            {tech_id: 1, code: 'DEVARA-ClientNicolle-262', status: 'Alias Progress', substatus: 'Alias New', site: '14758 -  LANS W MORRIS', priority_id: 5, type_id: 2},
+            {tech_id: 2, code: 'DEVARA-RES-28428', status: 'Alias Closed', substatus: 'Alias Need Estimates', site: '73299 -  LANS NEW BUSINESS', priority_id: 1, type_id: 3},
+            {tech_id: 3, code: 'RES-000000058', status: 'Alias Completed', substatus: 'Alias Pending Payment', site: '73301 -  NORTH SHORE BALANCE SHEET', priority_id: 2, type_id: 4},
+            {tech_id: 4, code: 'RES-000000057', status: 'Alias Deferred', substatus: 'Alias Need Vendor', site: '73305 -  LASS 4TH', priority_id: 3, type_id: 5},
+            {tech_id: 5, code: 'DEVARA-RES-28427', status: 'Alias Planning', substatus: 'Alias Closed', site: '73307 -  LASS ANGUS', priority_id: 4, type_id: 6},
+            {tech_id: 6, code: 'DEVARA-ClientNicolle-261', status: 'Alias Cancelled', substatus: 'Alias Cancelled', site: '73314 -  LASS 17TH', priority_id: 5, type_id: 7},
+            {tech_id: 7, code: 'DEVARA-RES-28426', status: 'Alias All', substatus: 'Alias Check Out', site: '73316 -  LASS CARLISLE', priority_id: 1, type_id: 8},
+            ],
+            sortKey: '',
+            sortKeyWO: '',
+        },
+        methods: {
+            orderBy(sortKey) {
+                if(this.sortKey != sortKey){
+                    this.sortKey = sortKey
+                }else{
+                    this.orderAsc = !this.orderAsc;
+                }
+                if(this.orderAsc){
+                    if(sortKey == 'name'){
+                        this.techFiltered.sort((a, b) => a[sortKey].localeCompare(b[sortKey]));
+                    }else{
+                        this.techFiltered.sort((a, b) => a[sortKey] - b[sortKey]);
+                    }
+                }else{
+                    if(sortKey == 'name'){
+                        this.techFiltered.sort((a, b) => b[sortKey].localeCompare(a[sortKey]));
+                    }else{
+                        this.techFiltered.sort((a, b) => b[sortKey] - a[sortKey]);
+                    }
+                }
+            },
+            orderByWO(sortKeyWO) {
+                if(this.sortKeyWO != sortKeyWO){
+                    this.sortKeyWO = sortKeyWO;
+                }else{
+                    this.orderAscWo = !this.orderAscWo;
+                }
+                if(this.orderAscWo){
+                    this.wosForTech.sort((a, b) => a[sortKeyWO].localeCompare(b[sortKeyWO]));   
+                }else{
+                    this.wosForTech.sort((a, b) => b[sortKeyWO].localeCompare(a[sortKeyWO]));
+                }
+            },
+            viewDetails() {
+                this.modified();
+                this.orderByWO('code');
+                this.techSelected = {};
+                this.searchWO = '';
+                this.details = true;
+            },
+            assigned() {
+                for (var i = 0; i < this.techs.length; i++) {
+                    this.techs[i].sites = parseInt(Math.random()*20) + 1;
+                    this.techs[i].currently = parseInt(Math.random()*20) + 1;
+                    this.techs[i].overdue = parseInt(Math.random()*20) + 1;
+                    this.techs[i].vendor_assigned = parseInt(Math.random()*20) + 1;
+                    this.techs[i].unassigned = parseInt(Math.random()*20) + 1;
+                    this.techs[i].pending_confirmation = parseInt(Math.random()*20) + 1;
+                    this.techs[i].check_in = parseInt(Math.random()*20) + 1;
+                    this.techs[i].check_out = parseInt(Math.random()*20) + 1;
+                    this.techs[i].total = parseInt(Math.random()*20) + 1;
+                }
+
+            },
+            modified() {
+                for (var i = 0; i < this.wos.length; i++) {
+                    let tech_id = parseInt(Math.random()*7) + 1;
+                    let priority_id = Math.random() > 0.5 ? parseInt(Math.random()*5) + 1 : this.priority_id;
+                    let type_id = Math.random() > 0.5 ? parseInt(Math.random()*8) + 1 : this.type_id;
+                    this.wos[i].tech_id = tech_id;
+                    this.wos[i].priority_id = priority_id;
+                    this.wos[i].type_id = type_id;
+                }
+            }
+        },
+        computed: {
+            wosForTech() {
+                return this.wos.filter((wo) =>
+                    wo.priority_id == this.priority_id &&
+                    wo.type_id == this.type_id &&
+                    wo.tech_id == this.techSelected.tech_id &&
+                    (
+                        wo.code.toLowerCase().includes(this.searchWO.toLowerCase()) ||
+                        wo.status.toLowerCase().includes(this.searchWO.toLowerCase()) ||
+                        wo.substatus.toLowerCase().includes(this.searchWO.toLowerCase()) ||
+                        wo.site.toLowerCase().includes(this.searchWO.toLowerCase())
+                        )
+                    );
+            },
+            techFiltered() {
+                return this.techs.filter(
+                    (tech) => 
+                    tech.name
+                    .toLowerCase()
+                    .includes(this.searchTech.toLowerCase())
+                    );
+            },
+            techPagesNumber(){
+                let total = parseInt(this.techFiltered.length);
+                let techPerPage = parseInt(this.techPerPage);
+                let pages = Math.trunc(total/techPerPage);
+                if(total > techPerPage * pages){
+                    pages++;
+                }
+                return pages; 
+            },
+            woPagesNumber(){
+                let total = parseInt(this.wosForTech.length);
+                let woPerPage = parseInt(this.woPerPage);
+                let pages = Math.trunc(total/woPerPage);
+                if(total > woPerPage * pages){
+                    pages++;
+                }
+                return pages; 
+            }
+        },
+        mounted() {
+            this.orderBy('name')
+        },
+        watch: {
+            techPerPage() {
+                this.pagTech = 1;
+            },
+            woPerPage() {
+                this.pagWo = 1;
+            },
+            type_id() {
+                this.assigned();
+            },
+            priority_id() {
+                this.assigned();
+            },           
+        }
+    })
+</script>
+<style>
+    .row-click {
+        cursor: pointer;
+    }
+    .orderBy {
+        cursor: pointer;
+    }
+    .navbar-center {
+        position: absolute;
+        left: 50%;
+        transform: translatex(-50%);
+    }
+    .table{
+        font-size:0.8rem
+    }
+</style>
+
+</body>
+</html>
